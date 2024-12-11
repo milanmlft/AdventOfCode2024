@@ -21,6 +21,8 @@ func main() {
 		panic(err)
 	}
 
+	// Part 1
+
 	// Sort both columns in ascending order
 	sort.Ints(input.leftCol)
 	sort.Ints(input.rightCol)
@@ -34,7 +36,25 @@ func main() {
 		}
 		total += diff
 	}
-	fmt.Println("Result: ", total)
+	fmt.Println("Part 1 result: ", total)
+
+	// Part 2
+	similarity := 0
+	for _, left := range input.leftCol {
+		occurrence := 0
+		for _, right := range input.rightCol {
+			// Assuming sorted input
+			if right > left {
+				break
+			}
+			if right == left {
+				occurrence++
+			}
+		}
+		similarity += left * occurrence
+	}
+
+	fmt.Println("Part 2 result: ", similarity)
 }
 
 func readInput(filePath string) (*table, error) {
