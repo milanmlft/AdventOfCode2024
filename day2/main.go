@@ -16,22 +16,30 @@ func main() {
 	}
 
 	nSafe := 0
+	nDampedSafe := 0
 	for _, r := range input {
 		r.printReport()
 		if r.isSafe() {
 			nSafe++
+			nDampedSafe++
 			fmt.Printf(" : Safe")
+		} else {
+			if r.isDampedSafe() {
+				nDampedSafe++
+				fmt.Printf(" : Damped Safe")
+			}
 		}
 		fmt.Println()
 	}
 	fmt.Println("Part 1 result: ", nSafe)
+	fmt.Println("Part 2 result: ", nDampedSafe)
 }
 
 type report struct {
 	levels []int
 }
 
-func (r *report) isSafe() bool {
+func (r report) isSafe() bool {
 	isIncreasing := r.levels[1] > r.levels[0]
 
 	for i := 0; i < len(r.levels)-1; i++ {
@@ -59,7 +67,22 @@ func (r *report) isSafe() bool {
 	return true
 }
 
-func (r *report) printReport() {
+func (r report) isDampedSafe() bool {
+	for i := 0; i < len(r.levels); i++ {
+		// Check report after removing each level by
+		// explicitly creating a new slice and copying over the levels
+		dampedLevels := make([]int, 0, len(r.levels)-1)
+		dampedLevels = append(dampedLevels, r.levels[:i]...)
+		dampedLevels = append(dampedLevels, r.levels[i+1:]...)
+		dampedReport := report{dampedLevels}
+		if dampedReport.isSafe() {
+			return true
+		}
+	}
+	return false
+}
+
+func (r report) printReport() {
 	for _, v := range r.levels {
 		fmt.Printf("%d ", v)
 	}
