@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -15,14 +16,39 @@ func main() {
 		panic(err)
 	}
 
-	total := 0
+	total1 := 0
+	total2 := 0
+	// part 1
 	for _, line := range input {
 		instructions := extractInstructions(line)
 		for _, instruction := range instructions {
-			total += executeInstruction(instruction)
+			total1 += executeInstruction(instruction)
 		}
+
 	}
-	fmt.Printf("Part 1 solution: %d\n", total)
+
+	// part 2
+	enabledInstructions := extractEnabledInstructions(input)
+	for _, instruction := range enabledInstructions {
+		total2 += executeInstruction(instruction)
+	}
+
+	fmt.Printf("Part 1 solution: %d\n", total1)
+	fmt.Printf("Part 2 solution: %d\n", total2)
+}
+
+func extractEnabledInstructions(lines []string) []string {
+	// Join lines together so we can handle disabled instructions that span multiple lines
+	allLines := strings.Join(lines, "")
+	re := regexp.MustCompile(
+		`^(.*?)don't\(\)|do\(\)(.*?)don't\(\)|do\(\)(.*?)$|^(.*?)$`,
+	)
+	enabledInstructions := re.FindAllString(allLines, -1)
+	out := []string{}
+	for _, s := range enabledInstructions {
+		out = append(out, extractInstructions(s)...)
+	}
+	return out
 }
 
 func extractInstructions(line string) []string {
