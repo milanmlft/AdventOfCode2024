@@ -12,14 +12,58 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	// Part 1
 	nHorizontal := countHorizontalInstances(input)
-	fmt.Println("Horizontal: ", nHorizontal)
 	nVertical := countVerticalInstances(input)
-	fmt.Println("Vertical: ", nVertical)
 	nDiagonal := countDiagonalInstances(input)
-	fmt.Println("Diagonal: ", nDiagonal)
 	total := nHorizontal + nVertical + nDiagonal
 	fmt.Println("Result: ", total)
+
+	// Part 2
+	fmt.Println("Result part 2:", countCrossMasses(input))
+}
+
+func countCrossMasses(lines []string) int {
+	total := 0
+	lineLengh := len(lines[0])
+	// Find all 'A' positions as centre of the cross
+	re := regexp.MustCompile("A")
+	for l := 1; l < len(lines)-1; l++ {
+		locA := re.FindAllStringIndex(lines[l], -1)
+		for _, loc := range locA {
+			if loc[0] < lineLengh-1 && loc[0] > 0 {
+				if detectCrossMass(lines, l, loc[0]) {
+					total++
+				}
+			}
+		}
+	}
+	return total
+}
+
+func detectCrossMass(lines []string, line int, loc int) bool {
+	tl := lines[line-1][loc-1]
+	tr := lines[line-1][loc+1]
+	bl := lines[line+1][loc-1]
+	br := lines[line+1][loc+1]
+
+	forwardDiagonal := []byte{tl, lines[line][loc], br}
+	backwardDiagonal := []byte{bl, lines[line][loc], tr}
+
+	forwardMatchedMAS, _ := regexp.Match("MAS", forwardDiagonal)
+	forwardMatchedSAM, _ := regexp.Match("SAM", forwardDiagonal)
+	forwardMatched := forwardMatchedMAS || forwardMatchedSAM
+
+	backwardMatchedMAS, _ := regexp.Match("MAS", backwardDiagonal)
+	backwardMatchedSAM, _ := regexp.Match("SAM", backwardDiagonal)
+	backwardMatched := backwardMatchedMAS || backwardMatchedSAM
+
+	if forwardMatched && backwardMatched {
+		return true
+	}
+
+	return false
 }
 
 func countHorizontalInstances(lines []string) int {
