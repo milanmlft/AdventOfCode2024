@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-    "strconv"
+	"strconv"
+    "slices"
 )
 
 func main() {
@@ -17,6 +18,7 @@ func main() {
     pages := parsePages(input)
 
     total := 0
+    total2 := 0
 
     for _, p := range pages {
         fmt.Println("Pages: ", p)
@@ -24,9 +26,15 @@ func main() {
         if p.inOrder(rules) {
             middle := p[(len(p) - 1) / 2]
             total += middle
+        } else {
+            ordered := p.orderPages(rules)
+            fmt.Println("Ordered: ", ordered)
+            middle := ordered[(len(ordered) - 1) / 2]
+            total2 += middle
         }
     }
     fmt.Println("Part 1 result: ", total)
+    fmt.Println("Part 2 result: ", total2)
 }
 
 type rules map[int][]int
@@ -71,6 +79,19 @@ func (p pages) inOrder(r rules) bool {
     }
     // Check remaining pages
     return p[0:len(p) - 1].inOrder(r)
+}
+
+func (p pages) orderPages(r rules) pages {
+    ordered := make([]int, len(p))
+    for i := 0; i < len(p); i++ {
+        currentRules := r[p[i]]
+        for j := i - 1; j >= 0; j-- {
+            if slices.Contains(currentRules, ordered[j]) {
+                ordered[j], ordered[i] = ordered[i], ordered[j]
+            }
+        }
+    }
+    return ordered
 }
 
 func parsePages(input []string) []pages {
